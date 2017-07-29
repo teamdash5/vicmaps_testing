@@ -27,6 +27,7 @@
                 width: 100%;
                 height: 100%;
                 position: relative;
+                pointer-events: auto;
             }
             #pollution {
                 width: 100%;
@@ -34,6 +35,7 @@
                 position: absolute;
                 background: rgba(0,0,0,0.0);
                 z-index: 2999;
+                pointer-events: none;
             }
             #instructions {
                 width: 50%;
@@ -44,13 +46,13 @@
                 background: rgba(0, 0, 0, 0.5);
             }
             rect {
-            fill: none;
-            pointer-events: all;
+                fill: none;
+                pointer-events: none;
             }
             circle {
-            fill: none;
-            stroke-width: 2.5px;
-            z-index: 2999;
+                fill: none;
+                stroke-width: 2.5px;
+                z-index: 2999;
             }
         </style>
     </head>
