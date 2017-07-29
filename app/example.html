@@ -42,6 +42,7 @@
                 var url = "//api.maps.vic.gov.au/geowebcacheWM/service/wmts";
                 var att = "Vicmap API © " + new Date().getFullYear() + " State Government of Victoria | <a href='http://api.maps.vic.gov.au/vicmapapi/Copyright.jsp' target='_blank' style='color:#4BABFA;'>Copyright and Disclaimer</a> "
                 var p3857 = new OpenLayers.Projection("EPSG:3857");
+                var p4326 = new OpenLayers.Projection("EPSG:4326");
                 var tileExtent = new OpenLayers.Bounds(15359931, -6164655, 17252630, -3765811);
                 var maxEextent = new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34);
                 var tilesize = new OpenLayers.Size(512, 512);
@@ -156,6 +157,24 @@
                     }
                 });
 
+                // return a point in 'normal' lat long units from a point in map units
+                var mapUnitsToLatLong = function (point) {
+                    var cpoint = point.clone();
+                    return point.transform(p3857, p4326);
+                }
+
+                var onMapViewChange = function (event) {
+                    // zoomend generates a moveend event anyway
+                    if (event.type == 'moveend') {
+                        var ext = theMap.getExtent();
+                        var topleft = new OpenLayers.LonLat(ext.left, ext.top);
+                        var botrite = new OpenLayers.LonLat(ext.right, ext.bottom);
+                        topleft = mapUnitsToLatLong(topleft);
+                        botrite = mapUnitsToLatLong(botrite);
+                        console.log('view: ' + topleft + ' and ' + botrite);
+                    }
+                };
+
                 eventListeners = {
                     changebaselayer: function(e) {
                         // Pull in the sat_overlay which is a clone of vmapi_sat. make it visible, put it under the bottom.
@@ -164,7 +183,9 @@
                             sat_overlay.setZIndex(0);
                         } else
                             sat_overlay.setVisibility(false); // turn it off when the hybrid is not visible
-                    }
+                    },
+                    moveend: onMapViewChange,
+                    zoomend: onMapViewChange
                 };
                 theMap = new OpenLayers.Map({
                     div: "map",
