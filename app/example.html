@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -88,57 +87,6 @@
                 });
                 vmapi.setTileSize(tilesize);
                 vmapi.projection = p3857;
-                var vmapi_sat = new OpenLayers.Layer.WMTS({
-                    name: "Vicmap API - Satellite",
-                    //sphericalMercator: true,
-                    url: url,
-                    layer: "SATELLITE_WM",
-                    div: "map",
-                    matrixSet: "EPSG:3857_SATELLITE_WM",
-                    ServerResolutions: resosWM,
-                    matrixIds: matrixIds("EPSG:3857_SATELLITE_WM", 21),
-                    format: "image/png",
-                    style: "_null",
-                    opacity: 1,
-                    isBaseLayer: true,
-                    tileFullExtent: tileExtent,
-                    maxExtent: maxEextent,
-                    attribution: att,
-                });
-                vmapi_sat.setTileSize(tilesize);
-                vmapi_sat.projection = p3857;
-                var vmapi_hy = new OpenLayers.Layer.WMTS({
-                    name: "Vicmap API - Hybrid",
-                    //sphericalMercator: true,
-                    url: url,
-                    layer: "HYBRID_MERCATOR",
-                    div: "map",
-                    matrixSet: "EPSG:3857_HYBRID_MERCATOR",
-                    ServerResolutions: resosWM,
-                    matrixIds: matrixIds("EPSG:3857_HYBRID_MERCATOR", 21),
-                    format: "image/png",
-                    style: "_null",
-                    opacity: 1,
-                    isBaseLayer: true,
-                    tileFullExtent: tileExtent,
-                    maxExtent: maxEextent,
-                    attribution: att
-                });
-                vmapi_hy.setTileSize(tilesize);
-                vmapi_hy.projection = p3857;
-                var sat_overlay = vmapi_sat.clone();
-                sat_overlay.isBaseLayer = false;
-                sat_overlay.displayInLayerSwitcher = false;
-                sat_overlay.visibility = false;
-
-                var mapclick = new OpenLayers.Control.Click(
-                        {
-                            trigger: function(e) {
-                                $("div.mapInfoDiv").remove();
-                                var point = theMap.getLonLatFromPixel(e.xy);
-                                drawTestBoxAtPoint(point);
-                            }
-                        });
 
                 // return a point in 'normal' lat long units from a point in map units
                 var mapUnitsToLatLong = function (point) {
@@ -159,47 +107,31 @@
                 };
 
                 eventListeners = {
-                    changebaselayer: function(e) {
-                        // Pull in the sat_overlay which is a clone of vmapi_sat. make it visible, put it under the bottom.
-                        if (vmapi_hy.visibility === true) {
-                            sat_overlay.setVisibility(true);
-                            sat_overlay.setZIndex(0);
-                        } else
-                            sat_overlay.setVisibility(false); // turn it off when the hybrid is not visible
-                    },
                     moveend: onMapViewChange,
                     zoomend: onMapViewChange
                 };
+
                 theMap = new OpenLayers.Map({
                     div: "map",
                     eventListeners: eventListeners,
-                    // theme: "./css/delwp_map_style.css", //add the delwp theme css from where it is located
-                    layers: [vmapi, vmapi_sat, vmapi_hy, sat_overlay],
+                    layers: [vmapi],
                     numZoomLevels: 21,
                     autoUpdateSize: false
                 });
-                sat_overlay.setVisibility(false);
+
                 theMap.addControl(new OpenLayers.Control.ScaleLine({
                     geodesic: true
                 }));
-                theMap.addControl(mapclick);
-                mapclick.activate();
-                var ls = new OpenLayers.Control.LayerSwitcher(); // Needed for the settings div/icon to be displayed
-                theMap.addControl(ls);// Needed for the settings div/icon to be displayed
+
                 theMap.zoomToExtent([15429272, -4742764, 16945783, -4008969], true);
-                ls.baseLbl.innerText = "CHANGE MAP VIEW";
-                //ls.dataLbl.innerText = "OVERLAYS";
             });
+
             window.onresize = function() {
                 setTimeout(function() {
                     theMap.updateSize();
                 }, 200);
             };
-            function drawTestBoxAtPoint(point) {
-                console.log("you clicked at: " + point.transform(
-                    new OpenLayers.Projection("EPSG:3857"),
-                    new OpenLayers.Projection("EPSG:4326")));
-            };
+            
             function matrixIds(name, l) {
                 var matrixids = new Array(l);
                 for (var i = 0; i <= l - 1; ++i) {

@@ -7,8 +7,6 @@ var infoReturned = [];
 var locate, triggered; // triggered is the global varable to make the location search field selectable on the map
 var layerSwitcher;
 $(function () {
-    layerSwitcher = theMap.getControlsByClass("OpenLayers.Control.LayerSwitcher")[0];
-    layerSwitcher.maximizeDiv.src = "";
     //Add Div for location, geolocator and print buttons
     var locDiv = $("<div></div>").addClass("olLocationDiv");
     $(".olControlLayerSwitcher").after(locDiv);
