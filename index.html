@@ -10,8 +10,12 @@
         <script type="text/javascript" src="./openlayers/OpenLayers.js"></script>
         <script src="./js/jquery.min.js"></script>
         <script src="./js/jquery-ui.min.js"></script>
-
         <script src="./js/click.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="./js/data_gov_request.js"></script>
+        <script src="./js/particles.js"></script>
+        <script src="./js/animate_points.js"></script>
+        <script src="./js/pollution_points.js"></script>
         <style>
             div.featicondiv{
                 width: 20px !important;
@@ -24,6 +28,13 @@
                 height: 100%;
                 position: relative;
             }
+            #pollution {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                background: rgba(0,0,0,0.0);
+                z-index: 2999;
+            }
             #instructions {
                 width: 50%;
                 height: auto;
@@ -31,6 +42,15 @@
                 float: right;
                 z-index: 3000;
                 background: rgba(0, 0, 0, 0.5);
+            }
+            rect {
+            fill: none;
+            pointer-events: all;
+            }
+            circle {
+            fill: none;
+            stroke-width: 2.5px;
+            z-index: 2999;
             }
         </style>
     </head>
@@ -41,6 +61,7 @@
                 <p>Pan and zoom the map to the level you want, then press the button</p>
                 <button id="btn_gotoPollution">POLLUTION EXPLOSION!</button>
             </div>
+            <div id="pollution"></div>
             <div id="map"></div>
         </div>
         <script>
