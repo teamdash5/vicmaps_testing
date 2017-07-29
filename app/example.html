@@ -30,6 +30,7 @@
         </style>
     </head>
     <body>
+        <button id="btn_gotoPollution">POLLUTION EXPLOSION!</button>
         <div id="map"></div>
         <script>
             var theMap; // Used in the delwp theme to send functions to the map
@@ -92,23 +93,29 @@
                 var mapUnitsToLatLong = function (point) {
                     var cpoint = point.clone();
                     return point.transform(p3857, p4326);
+                };
+
+                // return the top left and bottom right corners of the current map view
+                var getCurrentMapViewBox = function () {
+                    var ext = theMap.getExtent();
+                    var topleft = new OpenLayers.LonLat(ext.left, ext.top);
+                    var botrite = new OpenLayers.LonLat(ext.right, ext.bottom);
+                    topleft = mapUnitsToLatLong(topleft);
+                    botrite = mapUnitsToLatLong(botrite);
+                    return {"topleft": topleft, "botrite": botrite};
                 }
 
                 var onMapViewChange = function (event) {
                     // zoomend generates a moveend event anyway
+                    corners = getCurrentMapViewBox();
                     if (event.type == 'moveend') {
-                        var ext = theMap.getExtent();
-                        var topleft = new OpenLayers.LonLat(ext.left, ext.top);
-                        var botrite = new OpenLayers.LonLat(ext.right, ext.bottom);
-                        topleft = mapUnitsToLatLong(topleft);
-                        botrite = mapUnitsToLatLong(botrite);
-                        console.log('view: ' + topleft + ' and ' + botrite);
+                        console.log('view: ' + corners.topleft + ' and ' + corners.botrite);
                     }
                 };
 
                 eventListeners = {
-                    moveend: onMapViewChange,
-                    zoomend: onMapViewChange
+                    // moveend: onMapViewChange,
+                    // zoomend: onMapViewChange
                 };
 
                 theMap = new OpenLayers.Map({
@@ -122,6 +129,17 @@
                 theMap.addControl(new OpenLayers.Control.ScaleLine({
                     geodesic: true
                 }));
+
+                var getPollutionUrl = function (topleft, botrite) {
+                    var params = `toplat=${topleft.lat}&toplon=${topleft.lon}&botlat=${botrite.lat}&botlon=${botrite.lon}`;
+                    return `http://nfio.co.nf/volume_vis/particles.html?${params}`;
+                };
+
+                $("#btn_gotoPollution").click(function() {
+                    var vb = getCurrentMapViewBox();
+                    var url = getPollutionUrl(vb.topleft, vb.botrite);
+                    window.open(url);
+                });
 
                 theMap.zoomToExtent([15429272, -4742764, 16945783, -4008969], true);
             });
