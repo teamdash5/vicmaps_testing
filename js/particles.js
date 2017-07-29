@@ -3,18 +3,8 @@ var width = Math.max(960, innerWidth),
 
 var i = 0;
 
-function startParticleAnimation() {
-  var svg = d3.select("#pollution").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-  svg.append("rect")
-    .attr("width", width)
-    .attr("height", height)
-    .on("ontouchstart" in document ? "touchmove" : "mousemove", particle);
-
-  function particle(xy) {
-  var m = xy ? xy : d3.mouse(this);
+function particle(svg, xy) {
+  var m = xy;
 
   svg.insert("circle", "rect")
       .attr("cx", m[0])
@@ -30,5 +20,20 @@ function startParticleAnimation() {
       .remove();
 
   //  d3.event.preventDefault();
-  }
+}
+
+function startParticleAnimation() {
+  var svg = d3.select("#pollution").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  var particleSvg = function (xy) {
+    xy = xy ? xy : d3.mouse(this);
+    particle(svg, xy);
+  };
+
+  svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .on("ontouchstart" in document ? "touchmove" : "mousemove", particleSvg);
 }

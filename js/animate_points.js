@@ -11,6 +11,8 @@ t = 0
 
 
 animate_points = function(points, width, height, duration) {
+    var svg = d3.select("#pollution > svg");
+
     max_time = duration * 60
     xy[0] += 20
     xy[1] += 20
@@ -24,7 +26,7 @@ animate_points = function(points, width, height, duration) {
           == parseInt(100 * t / max_time)) {
             x = width * points[i]['x'] / 100
             y = height * points[i]['y'] / 100
-            particle([x, y])       
+            particle(svg, [x, y]);
         }
     }
 }
