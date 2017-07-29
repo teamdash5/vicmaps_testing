@@ -52,6 +52,6 @@ body {
 div#map{
     height: 100%;
     width: 100%;
-/*    border: 1px solid #000;*/
+    position: absolute;
 }
 
