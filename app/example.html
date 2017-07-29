@@ -192,7 +192,9 @@
                 }, 200);
             };
             function drawTestBoxAtPoint(point) {
-                console.log("you clicked at: " + point);
+                console.log("you clicked at: " + point.transform(
+                    new OpenLayers.Projection("EPSG:3857"),
+                    new OpenLayers.Projection("EPSG:4326")));
             };
             function matrixIds(name, l) {
                 var matrixids = new Array(l);
