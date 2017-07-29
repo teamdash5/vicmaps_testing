@@ -1,0 +1,14 @@
+{
+  "name": "delwp_example",
+  "private": true,
+  "version": "0.0.0",
+  "description": "uhhhhhhh",
+  "repository": "asdf",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^0.9.0"
+  },
+  "scripts": {
+    "start": "http-server ./app -a localhost -p 8000 -c-1"
+  }
+}

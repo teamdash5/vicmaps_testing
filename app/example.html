@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Coordinated Imagery Program Status Map</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <!-- 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /> 
+        -->
+        <link href="./css/jquery-ui.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="./css/delwp.css" />
+
+
+        <script type="text/javascript" src="./openlayers/OpenLayers.js"></script>
+        <script src="./js/jquery.min.js"></script>
+        <script src="./js/jquery-ui.min.js"></script>
+
+        <script src="./js/click.js"></script>
+        <!-- <script src="./js/proj4.js"></script> -->
+        <style>
+            /* img.olImageLoadError {
+                display: none;
+            } */
+            div.featicondiv{
+                width: 20px !important;
+                height: 20px !important;
+                background-size: 20px 20px !important;
+                opacity: 0.7 !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            var theMap; // Used in the delwp theme to send functions to the map
+            /*
+             * Here is a basic map being created. with a couple of extra values. Right at the end I have assigned
+             * the above theMap global variable to the map that was created.
+             */
+            $(function() {
+                var url = "//api.maps.vic.gov.au/geowebcacheWM/service/wmts";
+                var att = "Vicmap API © " + new Date().getFullYear() + " State Government of Victoria | <a href='http://api.maps.vic.gov.au/vicmapapi/Copyright.jsp' target='_blank' style='color:#4BABFA;'>Copyright and Disclaimer</a> "
+                var p3857 = new OpenLayers.Projection("EPSG:3857");
+                var tileExtent = new OpenLayers.Bounds(15359931, -6164655, 17252630, -3765811);
+                var maxEextent = new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34);
+                var tilesize = new OpenLayers.Size(512, 512);
+                var resosWM = [
+                    156543.03392804097,
+                    78271.51696402048,
+                    39135.75848201024,
+                    19567.87924100510000,
+                    9783.93962050256000,
+                    4891.96981025128000,
+                    2445.98490512564000,
+                    1222.99245256282000,
+                    611.49622628141000,
+                    305.74811314070500,
+                    152.87405657035200,
+                    76.43702828517620,
+                    38.21851414258810,
+                    19.10925707129400,
+                    9.55462853564703,
+                    4.77731426782351,
+                    2.388657133911758,
+                    1.194328566955879,
+                    0.5971642834779395,
+                    0.2985821416974068,
+                    0.1492910708487034
+                ];
+                var vmapi = new OpenLayers.Layer.WMTS({
+                    name: "Vicmap API - Cartographic",
+                    //sphericalMercator: true,
+                    url: url,
+                    layer: "WEB_MERCATOR",
+                    div: "map",
+                    matrixSet: "EPSG:3857_WEB_MERCATOR",
+                    ServerResolutions: resosWM,
+                    matrixIds: matrixIds("EPSG:3857_WEB_MERCATOR", 21),
+                    format: "image/png",
+                    style: "_null",
+                    opacity: 1,
+                    isBaseLayer: true,
+                    tileFullExtent: tileExtent,
+                    maxExtent: maxEextent,
+                    attribution: att
+                });
+                vmapi.setTileSize(tilesize);
+                vmapi.projection = p3857;
+                var vmapi_sat = new OpenLayers.Layer.WMTS({
+                    name: "Vicmap API - Satellite",
+                    //sphericalMercator: true,
+                    url: url,
+                    layer: "SATELLITE_WM",
+                    div: "map",
+                    matrixSet: "EPSG:3857_SATELLITE_WM",
+                    ServerResolutions: resosWM,
+                    matrixIds: matrixIds("EPSG:3857_SATELLITE_WM", 21),
+                    format: "image/png",
+                    style: "_null",
+                    opacity: 1,
+                    isBaseLayer: true,
+                    tileFullExtent: tileExtent,
+                    maxExtent: maxEextent,
+                    attribution: att,
+                });
+                vmapi_sat.setTileSize(tilesize);
+                vmapi_sat.projection = p3857;
+                var vmapi_hy = new OpenLayers.Layer.WMTS({
+                    name: "Vicmap API - Hybrid",
+                    //sphericalMercator: true,
+                    url: url,
+                    layer: "HYBRID_MERCATOR",
+                    div: "map",
+                    matrixSet: "EPSG:3857_HYBRID_MERCATOR",
+                    ServerResolutions: resosWM,
+                    matrixIds: matrixIds("EPSG:3857_HYBRID_MERCATOR", 21),
+                    format: "image/png",
+                    style: "_null",
+                    opacity: 1,
+                    isBaseLayer: true,
+                    tileFullExtent: tileExtent,
+                    maxExtent: maxEextent,
+                    attribution: att
+                });
+                vmapi_hy.setTileSize(tilesize);
+                vmapi_hy.projection = p3857;
+                var sat_overlay = vmapi_sat.clone();
+                sat_overlay.isBaseLayer = false;
+                sat_overlay.displayInLayerSwitcher = false;
+                sat_overlay.visibility = false;
+
+                var nvt = "//nvt.dse.vic.gov.au/arcgis/services/BusinessApps/CIP/MapServer/WMSServer";
+                var cip = new OpenLayers.Layer.WMS(
+                        'CIP Projects 2016-2017',
+                        nvt,
+                        {transparent: true, layers: '0,1,2,3', format: 'image/png'
+                        },
+                {isBaseLayer: false, visibility: true, singleTile: true, projection: p3857, opacity: 0.9
+                });
+                var mapclick = new OpenLayers.Control.Click(
+                        {
+                            trigger: function(e) {
+                                $("div.mapInfoDiv").remove();
+                                var point = theMap.getLonLatFromPixel(e.xy);
+                                drawTestBoxAtPoint(point);
+                            }
+                        });
+                var vec_feats = new OpenLayers.Layer.Vector("highlight", {
+                    "displayInLayerSwitcher": false,
+                    "projection": vmapi.projection,
+                    "eventListeners": {
+                        beforefeatureadded: function(e) {
+                            //e.feature.layer.removeAllFeatures();
+                        }
+                    }
+                });
+
+                eventListeners = {
+                    changebaselayer: function(e) {
+                        // Pull in the sat_overlay which is a clone of vmapi_sat. make it visible, put it under the bottom.
+                        if (vmapi_hy.visibility === true) {
+                            sat_overlay.setVisibility(true);
+                            sat_overlay.setZIndex(0);
+                        } else
+                            sat_overlay.setVisibility(false); // turn it off when the hybrid is not visible
+                    }
+                };
+                theMap = new OpenLayers.Map({
+                    div: "map",
+                    eventListeners: eventListeners,
+                    // theme: "./css/delwp_map_style.css", //add the delwp theme css from where it is located
+                    layers: [vmapi, vmapi_sat, vmapi_hy, sat_overlay, cip, vec_feats],
+                    numZoomLevels: 21,
+                    autoUpdateSize: false
+                });
+                sat_overlay.setVisibility(false);
+                theMap.addControl(new OpenLayers.Control.ScaleLine({
+                    geodesic: true
+                }));
+                theMap.addControl(mapclick);
+                mapclick.activate();
+                var ls = new OpenLayers.Control.LayerSwitcher(); // Needed for the settings div/icon to be displayed
+                theMap.addControl(ls);// Needed for the settings div/icon to be displayed
+                theMap.zoomToExtent([15429272, -4742764, 16945783, -4008969], true);
+                ls.baseLbl.innerText = "CHANGE MAP VIEW";
+                //ls.dataLbl.innerText = "OVERLAYS";
+            });
+            window.onresize = function() {
+                setTimeout(function() {
+                    theMap.updateSize();
+                }, 200);
+            };
+            function drawTestBoxAtPoint(point) {
+                console.log("you clicked at: " + point);
+            };
+            function matrixIds(name, l) {
+                var matrixids = new Array(l);
+                for (var i = 0; i <= l - 1; ++i) {
+                    matrixids[i] = name + ":" + i;
+                }
+                return matrixids;
+            }
+        </script>
+        <script src="./js/delwp_theme.js"></script>
+    </body>
+</html>
