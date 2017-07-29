@@ -131,14 +131,6 @@
                 sat_overlay.displayInLayerSwitcher = false;
                 sat_overlay.visibility = false;
 
-                var nvt = "//nvt.dse.vic.gov.au/arcgis/services/BusinessApps/CIP/MapServer/WMSServer";
-                var cip = new OpenLayers.Layer.WMS(
-                        'CIP Projects 2016-2017',
-                        nvt,
-                        {transparent: true, layers: '0,1,2,3', format: 'image/png'
-                        },
-                {isBaseLayer: false, visibility: true, singleTile: true, projection: p3857, opacity: 0.9
-                });
                 var mapclick = new OpenLayers.Control.Click(
                         {
                             trigger: function(e) {
@@ -147,15 +139,6 @@
                                 drawTestBoxAtPoint(point);
                             }
                         });
-                var vec_feats = new OpenLayers.Layer.Vector("highlight", {
-                    "displayInLayerSwitcher": false,
-                    "projection": vmapi.projection,
-                    "eventListeners": {
-                        beforefeatureadded: function(e) {
-                            //e.feature.layer.removeAllFeatures();
-                        }
-                    }
-                });
 
                 // return a point in 'normal' lat long units from a point in map units
                 var mapUnitsToLatLong = function (point) {
@@ -191,7 +174,7 @@
                     div: "map",
                     eventListeners: eventListeners,
                     // theme: "./css/delwp_map_style.css", //add the delwp theme css from where it is located
-                    layers: [vmapi, vmapi_sat, vmapi_hy, sat_overlay, cip, vec_feats],
+                    layers: [vmapi, vmapi_sat, vmapi_hy, sat_overlay],
                     numZoomLevels: 21,
                     autoUpdateSize: false
                 });
